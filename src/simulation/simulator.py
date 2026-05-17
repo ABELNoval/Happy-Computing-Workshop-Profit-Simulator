@@ -56,3 +56,34 @@ class HappyComputingSimulator:
         self.technician_queue = deque()
 
         self.specialist_queue = deque()
+
+    def initialize(self):
+
+        first_arrival = self.random.tiempo_entre_llegadas()
+
+        self.event_queue.push(
+            Event(time=first_arrival, event_type=EventType.CLIENT_ARRIVAL)
+        )
+
+    def run(self):
+
+        self.initialize()
+
+        while not self.event_queue.is_empty():
+            event = self.event_queue.pop()
+            self.clock = event.time
+            if self.clock > self.simulation_time:
+                break
+
+            match event.event_type:
+                case EventType.CLIENT_ARRIVAL:
+                    self.handle_client_arrival(event)
+
+                case EventType.SELLER_FINISH:
+                    self.handle_seller_finish(event)
+
+                case EventType.TECHNICIAN_FINISH:
+                    self.handle_technician_finish(event)
+
+                case EventType.SPECIALIST_FINISH:
+                    self.handle_specialist_finish(event)
