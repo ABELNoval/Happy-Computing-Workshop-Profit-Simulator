@@ -87,3 +87,15 @@ class HappyComputingSimulator:
 
                 case EventType.SPECIALIST_FINISH:
                     self.handle_specialist_finish(event)
+
+    def handle_client_arrival(self, event):
+        pass
+
+    def handle_seller_finish(self, event):
+        pass
+
+    def handle_technician_finish(self, event):
+        pass
+
+    def handle_specialist_finish(self, event):
+        pass
