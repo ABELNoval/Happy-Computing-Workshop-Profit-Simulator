@@ -1,4 +1,5 @@
 from collections import deque
+from statistics import mean
 
 from generators.random_variables import RandomVariables
 
@@ -10,7 +11,7 @@ from simulation.event_queue import EventQueue
 
 
 class HappyComputingSimulator:
-    def __init__(self, simulation_time=480):
+    def __init__(self, simulation_time=480, seed=None):
 
         # reloj de simulación
         self.clock = 0.0
@@ -19,61 +20,103 @@ class HappyComputingSimulator:
         self.simulation_time = simulation_time
 
         # generador aleatorio
-        self.random = RandomVariables(seed=42)
+        self.random = RandomVariables(seed=seed)
 
         # agenda de eventos
         self.event_queue = EventQueue()
 
-        # clientes creados
+        self.reset_state()
+
+    def reset_state(self):
+        self.event_queue = EventQueue()
         self.clients = {}
 
-        # contador ids
         self.next_client_id = 1
-
-        # dinero ganado
         self.money = 0
 
-        # -------------------
-        # EMPLEADOS
-        # -------------------
-
         self.sellers = [Employee(1, "seller"), Employee(2, "seller")]
-
         self.technicians = [
             Employee(1, "technician"),
             Employee(2, "technician"),
             Employee(3, "technician"),
         ]
-
         self.specialist = Employee(1, "specialist")
 
-        # -------------------
-        # COLAS
-        # -------------------
-
         self.seller_queue = deque()
-
         self.technician_queue = deque()
-
         self.specialist_queue = deque()
+
+        self.max_seller_queue = 0
+        self.max_technician_queue = 0
+        self.max_specialist_queue = 0
+
+        self.money_by_service = {1: 0, 2: 0, 3: 0, 4: 0}
+        self.completed_by_service = {1: 0, 2: 0, 3: 0, 4: 0}
+
+        self.wait_times = {"seller": [], "technician": [], "specialist": []}
+        self.system_times = []
+
+        self.arrivals_in_horizon = 0
+        self.completed_clients = 0
+
+    def record_queue_lengths(self):
+        self.max_seller_queue = max(self.max_seller_queue, len(self.seller_queue))
+        self.max_technician_queue = max(
+            self.max_technician_queue, len(self.technician_queue)
+        )
+        self.max_specialist_queue = max(
+            self.max_specialist_queue, len(self.specialist_queue)
+        )
+
+    def add_revenue(self, service_type, amount):
+        self.money += amount
+        self.money_by_service[service_type] += amount
+
+    def average_or_zero(self, values):
+        return mean(values) if values else 0.0
+
+    def build_summary(self):
+        return {
+            "simulation_time": self.simulation_time,
+            "clients_created": len(self.clients),
+            "arrivals_in_horizon": self.arrivals_in_horizon,
+            "clients_completed": self.completed_clients,
+            "money_total": self.money,
+            "money_by_service": self.money_by_service,
+            "completed_by_service": self.completed_by_service,
+            "average_wait_seller": self.average_or_zero(self.wait_times["seller"]),
+            "average_wait_technician": self.average_or_zero(
+                self.wait_times["technician"]
+            ),
+            "average_wait_specialist": self.average_or_zero(
+                self.wait_times["specialist"]
+            ),
+            "average_time_in_system": self.average_or_zero(self.system_times),
+            "max_seller_queue": self.max_seller_queue,
+            "max_technician_queue": self.max_technician_queue,
+            "max_specialist_queue": self.max_specialist_queue,
+            "remaining_seller_queue": len(self.seller_queue),
+            "remaining_technician_queue": len(self.technician_queue),
+            "remaining_specialist_queue": len(self.specialist_queue),
+        }
 
     def initialize(self):
 
         first_arrival = self.random.tiempo_entre_llegadas()
 
-        self.event_queue.push(
-            Event(time=first_arrival, event_type=EventType.CLIENT_ARRIVAL)
-        )
+        if first_arrival <= self.simulation_time:
+            self.event_queue.push(
+                Event(time=first_arrival, event_type=EventType.CLIENT_ARRIVAL)
+            )
 
     def run(self):
 
+        self.reset_state()
         self.initialize()
 
         while not self.event_queue.is_empty():
             event = self.event_queue.pop()
             self.clock = event.time
-            if self.clock > self.simulation_time:
-                break
 
             match event.event_type:
                 case EventType.CLIENT_ARRIVAL:
@@ -87,6 +130,7 @@ class HappyComputingSimulator:
 
                 case EventType.SPECIALIST_FINISH:
                     self.handle_specialist_finish(event)
+        return self.build_summary()
 
     def handle_client_arrival(self, event):
         # -------------------------
@@ -102,6 +146,7 @@ class HappyComputingSimulator:
         )
 
         self.clients[client.id] = client
+        self.arrivals_in_horizon += 1
 
         print(
             f"[{self.clock:.2f}] Cliente {client.id} llegó (tipo {client.service_type})"
@@ -113,9 +158,10 @@ class HappyComputingSimulator:
 
         next_arrival = self.clock + self.random.tiempo_entre_llegadas()
 
-        self.event_queue.push(
-            Event(time=next_arrival, event_type=EventType.CLIENT_ARRIVAL)
-        )
+        if next_arrival <= self.simulation_time:
+            self.event_queue.push(
+                Event(time=next_arrival, event_type=EventType.CLIENT_ARRIVAL)
+            )
 
         # -------------------------
         # Buscar vendedor libre
@@ -137,6 +183,9 @@ class HappyComputingSimulator:
             free_seller.current_client_id = client.id
 
             client.seller_start_time = self.clock
+            self.wait_times["seller"].append(
+                client.seller_start_time - client.arrival_time
+            )
 
             finish_time = self.clock + self.random.tiempo_vendedor()
 
@@ -155,6 +204,7 @@ class HappyComputingSimulator:
 
         else:
             self.seller_queue.append(client.id)
+            self.record_queue_lengths()
 
             print(f"Cliente {client.id} entra en cola vendedor")
 
@@ -206,6 +256,7 @@ class HappyComputingSimulator:
             # técnico ocupado
             else:
                 self.technician_queue.append(client.id)
+                self.record_queue_lengths()
 
                 print(f"Cliente {client.id} entra cola técnico")
 
@@ -244,10 +295,15 @@ class HappyComputingSimulator:
         if client.service_type == 4:
             client.exit_time = self.clock
 
-            self.money += 750
+            if self.clock <= self.simulation_time:
+                self.add_revenue(4, 750)
+
+            if self.clock <= self.simulation_time:
+                self.completed_clients += 1
+                self.completed_by_service[client.service_type] += 1
+                self.system_times.append(client.exit_time - client.arrival_time)
 
             print(f"Cliente {client.id} salió")
-            pass
 
         # -------------------------
         # Revisar cola vendedor
@@ -262,6 +318,9 @@ class HappyComputingSimulator:
             seller.current_client_id = next_client.id
 
             next_client.seller_start_time = self.clock
+            self.wait_times["seller"].append(
+                next_client.seller_start_time - next_client.arrival_time
+            )
 
             finish_time = self.clock + self.random.tiempo_vendedor()
 
@@ -296,13 +355,16 @@ class HappyComputingSimulator:
         # -------------------------
         client.exit_time = self.clock
 
-        # TODO:
-        # reemplazar por valores reales
-        if client.service_type == 1:
-            self.money += 0
+        if self.clock <= self.simulation_time:
+            if client.service_type == 1:
+                self.add_revenue(1, 0)
+            elif client.service_type == 2:
+                self.add_revenue(2, 350)
 
-        elif client.service_type == 2:
-            self.money += 350
+        if self.clock <= self.simulation_time:
+            self.completed_clients += 1
+            self.completed_by_service[client.service_type] += 1
+            self.system_times.append(client.exit_time - client.arrival_time)
 
         print(f"Cliente {client.id} salió")
 
@@ -320,6 +382,9 @@ class HappyComputingSimulator:
             technician.current_client_id = next_client.id
 
             next_client.technician_start_time = self.clock
+            self.wait_times["technician"].append(
+                next_client.technician_start_time - next_client.seller_end_time
+            )
 
             finish_time = self.clock + self.random.tiempo_tecnico()
 
@@ -352,10 +417,16 @@ class HappyComputingSimulator:
 
         client.exit_time = self.clock
 
-        if client.service_type == 3:
-            self.money += 500
-        elif client.service_type == 2:
-            self.money += 350
+        if self.clock <= self.simulation_time:
+            if client.service_type == 3:
+                self.add_revenue(3, 500)
+            elif client.service_type == 2:
+                self.add_revenue(2, 350)
+
+        if self.clock <= self.simulation_time:
+            self.completed_clients += 1
+            self.completed_by_service[client.service_type] += 1
+            self.system_times.append(client.exit_time - client.arrival_time)
 
         print(f"Cliente {client.id} salió")
 
@@ -374,6 +445,9 @@ class HappyComputingSimulator:
             self.specialist.current_client_id = next_client.id
 
             next_client.specialist_start_time = self.clock
+            self.wait_times["specialist"].append(
+                next_client.specialist_start_time - next_client.seller_end_time
+            )
 
             finish_time = self.clock + self.random.tiempo_tecnico_especializado()
 
@@ -404,6 +478,9 @@ class HappyComputingSimulator:
 
             # usa tiempo de técnico normal
             next_client.technician_start_time = self.clock
+            self.wait_times["technician"].append(
+                next_client.technician_start_time - next_client.seller_end_time
+            )
 
             finish_time = self.clock + self.random.tiempo_tecnico()
 
