@@ -1,0 +1,140 @@
+{
+  "number_of_runs": 100,
+  "simulation_time": 480,
+  "seed_start": 42,
+  "seed_end": 141,
+  "confidence_intervals_95": {
+    "clients_created": {
+      "lower": 22.90549493398231,
+      "upper": 24.69450506601769
+    },
+    "arrivals_in_horizon": {
+      "lower": 22.90549493398231,
+      "upper": 24.69450506601769
+    },
+    "clients_completed": {
+      "lower": 21.92716140629439,
+      "upper": 23.65283859370561
+    },
+    "money_total": {
+      "lower": 6302.881231113475,
+      "upper": 7067.118768886525
+    },
+    "average_wait_seller": {
+      "lower": 0.03361608522989676,
+      "upper": 0.062300112349676834
+    },
+    "average_wait_technician": {
+      "lower": 0.7541972543616986,
+      "upper": 2.164152698843302
+    },
+    "average_wait_specialist": {
+      "lower": 0.8210739894041263,
+      "upper": 3.5272758927312693
+    },
+    "average_time_in_system": {
+      "lower": 19.18178991073809,
+      "upper": 20.711555900306486
+    },
+    "max_seller_queue": {
+      "lower": 0.3635272884953195,
+      "upper": 0.5964727115046804
+    },
+    "max_technician_queue": {
+      "lower": 0.19617263470101276,
+      "upper": 0.42382736529898724
+    },
+    "max_specialist_queue": {
+      "lower": 0.0,
+      "upper": 0.0
+    }
+  },
+  "parameters": {
+    "arrivals": {
+      "distribution": "Poisson process interarrival times",
+      "mean_minutes": 20
+    },
+    "service_type_probabilities": {
+      "1": 0.45,
+      "2": 0.25,
+      "3": 0.1,
+      "4": 0.2
+    },
+    "vendor_service": {
+      "distribution": "Normal",
+      "mean_minutes": 5,
+      "std_dev_minutes": 2
+    },
+    "technician_service": {
+      "distribution": "Exponential",
+      "mean_minutes": 20
+    },
+    "specialist_service": {
+      "distribution": "Exponential",
+      "mean_minutes": 15
+    },
+    "employees": {
+      "sellers": 2,
+      "technicians": 3,
+      "specialists": 1
+    },
+    "prices": {
+      "1": 0,
+      "2": 350,
+      "3": 500,
+      "4": 750
+    }
+  },
+  "means": {
+    "clients_created": 23.8,
+    "arrivals_in_horizon": 23.8,
+    "clients_completed": 22.79,
+    "money_total": 6685,
+    "average_wait_seller": 0.047958098789786796,
+    "average_wait_technician": 1.4591749766025002,
+    "average_wait_specialist": 2.174174941067698,
+    "average_time_in_system": 19.946672905522288,
+    "max_seller_queue": 0.48,
+    "max_technician_queue": 0.31,
+    "max_specialist_queue": 0
+  },
+  "std_devs": {
+    "clients_created": 4.563801357233116,
+    "arrivals_in_horizon": 4.563801357233116,
+    "clients_completed": 4.4022377229878185,
+    "money_total": 1949.585555543495,
+    "average_wait_seller": 0.07317353857086756,
+    "average_wait_technician": 3.596825113473477,
+    "average_wait_specialist": 6.903576283997814,
+    "average_time_in_system": 3.9024642591030583,
+    "max_seller_queue": 0.5942485280851044,
+    "max_technician_queue": 0.5807518637703432,
+    "max_specialist_queue": 0.0
+  },
+  "mins": {
+    "clients_created": 11,
+    "arrivals_in_horizon": 11,
+    "clients_completed": 11,
+    "money_total": 2800,
+    "average_wait_seller": 0.0,
+    "average_wait_technician": 0.0,
+    "average_wait_specialist": 0.0,
+    "average_time_in_system": 12.776289422145249,
+    "max_seller_queue": 0,
+    "max_technician_queue": 0,
+    "max_specialist_queue": 0
+  },
+  "maxs": {
+    "clients_created": 34,
+    "arrivals_in_horizon": 34,
+    "clients_completed": 33,
+    "money_total": 11850,
+    "average_wait_seller": 0.3093055441677385,
+    "average_wait_technician": 19.30938831572996,
+    "average_wait_specialist": 40.73939302037826,
+    "average_time_in_system": 31.225557552424075,
+    "max_seller_queue": 2,
+    "max_technician_queue": 2,
+    "max_specialist_queue": 0
+  }
+}
