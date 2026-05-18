@@ -352,14 +352,16 @@ class HappyComputingSimulator:
 
         client.exit_time = self.clock
 
-        # tipo 3:
-        # cambio de equipo
-        self.money += 500
+        if client.service_type == 3:
+            self.money += 500
+        elif client.service_type == 2:
+            self.money += 350
 
         print(f"Cliente {client.id} salió")
 
         # -------------------------
-        # Revisar cola especialista
+        # PRIORIDAD 1:
+        # cola especialista
         # -------------------------
 
         if len(self.specialist_queue) > 0:
@@ -387,7 +389,37 @@ class HappyComputingSimulator:
             print(f"Cliente {next_client.id} sale cola especialista")
 
         # -------------------------
-        # No hay cola
+        # PRIORIDAD 2:
+        # ayudar técnico
+        # -------------------------
+
+        elif len(self.technician_queue) > 0:
+            next_client_id = self.technician_queue.popleft()
+
+            next_client = self.clients[next_client_id]
+
+            self.specialist.busy = True
+
+            self.specialist.current_client_id = next_client.id
+
+            # usa tiempo de técnico normal
+            next_client.technician_start_time = self.clock
+
+            finish_time = self.clock + self.random.tiempo_tecnico()
+
+            self.event_queue.push(
+                Event(
+                    time=finish_time,
+                    event_type=(EventType.SPECIALIST_FINISH),
+                    client_id=next_client.id,
+                    employee_id=1,
+                )
+            )
+
+            print(f"Especialista ayuda a técnico con cliente {next_client.id}")
+
+        # -------------------------
+        # Sin trabajo
         # -------------------------
 
         else:
