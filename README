@@ -1,0 +1,85 @@
+# Happy Computing Workshop Profit Simulator
+
+Proyecto universitario de simulación de eventos discretos para modelar el funcionamiento operativo de un taller de soporte y mantenimiento de computadoras. El objetivo fue representar el flujo de clientes, los recursos disponibles y los tiempos de atención para analizar el comportamiento del sistema bajo incertidumbre.
+
+## Descripción general
+
+El sistema simulado considera un horizonte de operación de 8 horas (480 minutos) y procesa clientes que ingresan con distintos tipos de servicio. Cada cliente pasa por una etapa inicial de vendedor y, según su tipo, puede continuar hacia técnico, especialista o salir del sistema. El modelo incorpora colas, recursos limitados y tiempos aleatorios de servicio para reproducir el comportamiento de un entorno real de atención.
+
+## Modelo implementado
+
+El simulador fue desarrollado como un modelo de eventos discretos. Los cambios de estado ocurren únicamente cuando sucede un evento relevante, como una llegada de cliente o la finalización de una atención.
+
+### Componentes principales
+
+- Clientes con tipo de servicio y marcas de tiempo por etapa.
+- Recursos humanos: 2 vendedores, 3 técnicos y 1 especialista.
+- Agenda de eventos administrada con una cola de prioridad.
+- Colas separadas para vendedor, técnico y especialista.
+- Variables aleatorias para llegadas, tipo de servicio y tiempos de atención.
+
+### Distribuciones utilizadas
+
+- Llegadas: proceso de Poisson, con interarribos exponenciales de media 20 minutos.
+- Tipo de servicio:
+	- Tipo 1: 45%
+	- Tipo 2: 25%
+	- Tipo 3: 10%
+	- Tipo 4: 20%
+- Tiempo de vendedor: distribución normal con media 5 minutos y desviación estándar 2.
+- Tiempo de técnico: distribución exponencial con media 20 minutos.
+- Tiempo de especialista: distribución exponencial con media 15 minutos.
+
+## Flujo del sistema
+
+- Todos los clientes ingresan primero a la etapa de vendedor.
+- Los clientes tipo 1 y 2 pasan después a técnico.
+- Los clientes tipo 3 pasan a especialista.
+- Los clientes tipo 4 salen del sistema luego del vendedor.
+- El especialista atiende su propia cola y, cuando no tiene clientes pendientes, puede apoyar a la cola de técnicos.
+
+## Resultados que genera el proyecto
+
+El programa ejecuta 100 réplicas independientes con semillas distintas y guarda los resultados en formato JSON. Se reportan medidas como:
+
+- Clientes creados y completados.
+- Ingreso total y por tipo de servicio.
+- Tiempo promedio de espera por etapa.
+- Tiempo promedio en el sistema.
+- Longitudes máximas de cola.
+- Intervalos de confianza al 95% para las métricas principales.
+
+Los archivos de salida se guardan en `src/results/`:
+
+- `simulation_runs.json`: resultados de cada corrida.
+- `simulation_summary.json`: resumen agregado con medias, desviaciones, mínimos, máximos e intervalos de confianza.
+
+## Estructura del proyecto
+
+```text
+src/
+	main.py
+	generators/
+		random_variables.py
+	models/
+		client.py
+		employee.py
+		event.py
+	simulation/
+		event_queue.py
+		simulator.py
+	results/
+		simulation_runs.json
+		simulation_summary.json
+```
+
+## Cómo ejecutar
+
+1. Abrir una terminal en la carpeta `src`.
+2. Ejecutar:
+
+```bash
+python main.py
+```
+
+3. Revisar los archivos generados en `src/results/`.
