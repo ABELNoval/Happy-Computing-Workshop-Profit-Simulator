@@ -45,8 +45,8 @@
       "upper": 0.42382736529898724
     },
     "max_specialist_queue": {
-      "lower": 0.0,
-      "upper": 0.0
+      "lower": 0.08617034106492073,
+      "upper": 0.2538296589350793
     }
   },
   "parameters": {
@@ -96,7 +96,7 @@
     "average_time_in_system": 19.946672905522288,
     "max_seller_queue": 0.48,
     "max_technician_queue": 0.31,
-    "max_specialist_queue": 0
+    "max_specialist_queue": 0.17
   },
   "std_devs": {
     "clients_created": 4.563801357233116,
@@ -109,7 +109,7 @@
     "average_time_in_system": 3.9024642591030583,
     "max_seller_queue": 0.5942485280851044,
     "max_technician_queue": 0.5807518637703432,
-    "max_specialist_queue": 0.0
+    "max_specialist_queue": 0.4277023415055065
   },
   "mins": {
     "clients_created": 11,
@@ -135,6 +135,6 @@
     "average_time_in_system": 31.225557552424075,
     "max_seller_queue": 2,
     "max_technician_queue": 2,
-    "max_specialist_queue": 0
+    "max_specialist_queue": 2
   }
 }

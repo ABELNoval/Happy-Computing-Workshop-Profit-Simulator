@@ -286,6 +286,7 @@ class HappyComputingSimulator:
 
             else:
                 self.specialist_queue.append(client.id)
+                self.record_queue_lengths()
 
                 print(f"Cliente {client.id} entra cola especialista")
 
