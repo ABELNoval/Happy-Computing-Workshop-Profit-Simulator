@@ -108,7 +108,6 @@ class HappyComputingSimulator:
         )
 
         # -------------------------
-
         # Programar siguiente llegada
         # -------------------------
 
@@ -160,7 +159,60 @@ class HappyComputingSimulator:
             print(f"Cliente {client.id} entra en cola vendedor")
 
     def handle_seller_finish(self, event):
-        pass
+        seller = self.sellers[event.employee_id - 1]
+
+        seller.busy = False
+        seller.current_client_id = None
+
+        client = self.clients[event.client_id]
+
+        client.seller_end_time = self.clock
+
+        print(f"[{self.clock:.2f}] Cliente {client.id} terminó vendedor")
+
+        # tipo 4 sale
+        if client.service_type == 4:
+            client.exit_time = self.clock
+
+            self.money += 750
+
+            print(f"Cliente {client.id} salió")
+            pass
+
+        # -------------------------
+        # Revisar cola vendedor
+        # -------------------------
+
+        if len(self.seller_queue) > 0:
+            next_client_id = self.seller_queue.popleft()
+
+            next_client = self.clients[next_client_id]
+
+            seller.busy = True
+            seller.current_client_id = next_client.id
+
+            next_client.seller_start_time = self.clock
+
+            finish_time = self.clock + self.random.tiempo_vendedor()
+
+            self.event_queue.push(
+                Event(
+                    time=finish_time,
+                    event_type=(EventType.SELLER_FINISH),
+                    client_id=next_client.id,
+                    employee_id=seller.id,
+                )
+            )
+
+            print(f"Cliente {next_client.id} sale de cola vendedor")
+
+        # -------------------------
+        # Si no hay cola
+        # -------------------------
+
+        else:
+            seller.busy = False
+            seller.current_client_id = None
 
     def handle_technician_finish(self, event):
         pass
